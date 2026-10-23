@@ -1,0 +1,699 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StudySync | Modern Collaborative Notes Sharing Platform</title>
+    
+    <meta name="description" content="StudySync is an online notes sharing and collaborative study platform. Share lecture summaries, cheat sheets, past papers, flashcards, and ace your exams together.">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%236366f1'><path d='M12 3L1 9l11 6 9-4.91V17h2V9L12 3zM3.45 9L12 4.34 20.55 9 12 13.66 3.45 9zM5 13.18v4L12 21l7-3.82v-4L12 17l-7-3.82z'/></svg>">
+
+    <!-- Self-contained custom stylesheet (Zero external CDN dependencies) -->
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+    <!-- Toast Notifications Shelf -->
+    <div id="toastContainer" class="toast-shelf"></div>
+
+    <!-- ========================================== -->
+    <!-- GLOBAL NAVBAR                              -->
+    <!-- ========================================== -->
+    <header class="app-header">
+        <div class="header-container">
+            
+            <!-- Brand Logo -->
+            <div class="brand-logo" onclick="switchTab('explore')" title="Go to Explore Feed">
+                <div class="brand-icon">
+                    <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                    </svg>
+                </div>
+                <div>
+                    <span class="brand-title">StudySync</span>
+                    <span class="brand-badge">PRO v2.5</span>
+                </div>
+            </div>
+
+            <!-- Global Search Bar -->
+            <div class="search-wrapper">
+                <span class="search-icon">🔍</span>
+                <input 
+                    type="text" 
+                    id="globalSearchInput" 
+                    placeholder="Search courses, topics (e.g. CS 201, Green's Theorem)..." 
+                    class="search-input"
+                />
+            </div>
+
+            <!-- Navigation Links -->
+            <nav class="nav-links">
+                <button onclick="switchTab('explore')" data-tab="explore" class="nav-link active">
+                    Explore
+                </button>
+                <button onclick="switchTab('library')" data-tab="library" class="nav-link">
+                    My Library
+                </button>
+                <button onclick="switchTab('studyHub')" data-tab="studyHub" class="nav-link">
+                    <span>AI Study Hub</span>
+                    <span style="width: 8px; height: 8px; border-radius: 9999px; background: #ec4899; display: inline-block;"></span>
+                </button>
+                <button onclick="switchTab('community')" data-tab="community" class="nav-link">
+                    Community
+                </button>
+            </nav>
+
+            <!-- Actions: Streak, Theme Toggle, Upload CTA, User Profile -->
+            <div class="header-actions">
+                
+                <!-- Study Streak Badge -->
+                <div class="streak-pill" title="Study Streak">
+                    <span>🔥</span>
+                    <span id="userStreakDays">7d Streak</span>
+                </div>
+
+                <!-- Dark / Light Theme Toggle -->
+                <button onclick="toggleTheme()" class="btn-icon" id="themeToggleBtn" title="Toggle Light / Dark Mode">
+                    <!-- Sun Icon (shown in dark mode) -->
+                    <svg id="sunIcon" class="hidden" width="18" height="18" fill="none" stroke="#f59e0b" stroke-width="2" viewBox="0 0 24 24">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <path stroke-linecap="round" d="M12 1v2m0 18v2M4.22 4.22l1.42 1.42m12.72 12.72l1.42 1.42M1 12h2m18 0h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>
+                    </svg>
+                    <!-- Moon Icon (shown in light mode) -->
+                    <svg id="moonIcon" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/>
+                    </svg>
+                </button>
+
+                <!-- Share Notes Button -->
+                <button onclick="openUploadModal()" class="btn-primary">
+                    <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M12 4v16m8-8H4"/></svg>
+                    <span>Share Notes</span>
+                </button>
+
+                <!-- User Profile Avatar -->
+                <div onclick="switchTab('library')" style="cursor: pointer;" title="Alex Rivera (Profile & Library)">
+                    <img id="userAvatarImg" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=80" style="width: 38px; height: 38px; border-radius: 9999px; object-fit: cover; border: 2px solid var(--primary);" alt="Profile" />
+                </div>
+
+            </div>
+        </div>
+    </header>
+
+
+    <!-- ========================================== -->
+    <!-- MAIN CONTENT SECTIONS                      -->
+    <!-- ========================================== -->
+    <main class="main-content">
+
+        <!-- ====================================== -->
+        <!-- TAB 1: EXPLORE FEED SECTION            -->
+        <!-- ====================================== -->
+        <section id="exploreSection">
+            
+            <!-- Hero Banner -->
+            <div class="hero-card">
+                <div class="hero-tag">
+                    <span>✨</span> Over 15,400+ peer-reviewed academic notes & study aids
+                </div>
+                <h1 class="hero-headline">
+                    Share Knowledge. <br>
+                    <span>Ace Exams. Study Together.</span>
+                </h1>
+                <p class="hero-description">
+                    Access verified student notes, formula cheat sheets, past exam breakdowns, and interactive AI-powered study flashcards from top universities worldwide.
+                </p>
+
+                <div class="hero-stats">
+                    <div class="hero-stat-item">
+                        <span class="hero-stat-val">98,000+</span>
+                        <span class="hero-stat-lbl">Active Students</span>
+                    </div>
+                    <div class="hero-stat-item">
+                        <span class="hero-stat-val">15,400+</span>
+                        <span class="hero-stat-lbl">Curated Notes</span>
+                    </div>
+                    <div class="hero-stat-item">
+                        <span class="hero-stat-val">450+</span>
+                        <span class="hero-stat-lbl">Universities</span>
+                    </div>
+                    <div class="hero-stat-item">
+                        <span class="hero-stat-val">4.9 / 5</span>
+                        <span class="hero-stat-lbl">Quality Rating</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pomodoro Focus Study Timer Widget -->
+            <div class="timer-widget">
+                <div style="display: flex; align-items: center; gap: 1rem;">
+                    <span style="font-size: 2rem;">⏱️</span>
+                    <div>
+                        <h4 style="font-size: 1.05rem; font-weight: 700; color: var(--text-main);">Study Focus Session</h4>
+                        <p style="font-size: 0.8rem; color: var(--text-muted);">Use the 25/5 Pomodoro method to study course notes without distraction.</p>
+                    </div>
+                </div>
+
+                <div style="display: flex; align-items: center; gap: 1.5rem; flex-wrap: wrap;">
+                    <div id="timerDisplay" class="timer-display">25:00</div>
+
+                    <div style="display: flex; gap: 0.5rem;">
+                        <button id="timerToggleBtn" onclick="StudyTimer.toggle()" class="btn-primary" style="padding: 0.5rem 1.25rem;">
+                            <span>▶️</span> Start
+                        </button>
+                        <button onclick="StudyTimer.reset()" class="btn-icon" title="Reset Timer">
+                            ↺
+                        </button>
+                    </div>
+
+                    <div style="display: flex; background: var(--bg-surface-subtle); padding: 0.25rem; border-radius: var(--radius-md); border: 1px solid var(--border-subtle); font-size: 0.75rem; font-weight: 700;">
+                        <button id="timerWorkModeBtn" onclick="StudyTimer.setMode('work')" style="padding: 0.35rem 0.75rem; border-radius: var(--radius-sm); background: var(--primary); color: #fff;">
+                            Focus (25m)
+                        </button>
+                        <button id="timerBreakModeBtn" onclick="StudyTimer.setMode('break')" style="padding: 0.35rem 0.75rem; border-radius: var(--radius-sm); color: var(--text-secondary);">
+                            Break (5m)
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Category Pills Bar -->
+            <div class="category-bar-title">
+                <h2>Browse by Academic Field</h2>
+                <span id="resultsCountBadge" style="font-size: 0.8rem; color: var(--text-muted); font-weight: 600;">8 resources available</span>
+            </div>
+            
+            <div class="category-chips">
+                <button class="category-chip active" data-category="All">All Disciplines</button>
+                <button class="category-chip" data-category="Computer Science">💻 Computer Science</button>
+                <button class="category-chip" data-category="Mathematics">📐 Mathematics</button>
+                <button class="category-chip" data-category="Medical & Bio">🧬 Biology & Pre-Med</button>
+                <button class="category-chip" data-category="Chemistry">🧪 Chemistry</button>
+                <button class="category-chip" data-category="Physics">⚡ Physics</button>
+                <button class="category-chip" data-category="Business & Law">📈 Economics & Business</button>
+                <button class="category-chip" data-category="Humanities">🏛️ History & Humanities</button>
+            </div>
+
+            <!-- Secondary Filters & Sorting Controls -->
+            <div class="toolbar-bar">
+                <div class="filter-group">
+                    <span style="font-weight: 600;">Resource Format:</span>
+                    <select id="resourceTypeSelect" class="select-control">
+                        <option value="All">All Resource Types</option>
+                        <option value="Comprehensive Notes">Comprehensive Notes</option>
+                        <option value="Cheat Sheet">Cheat Sheets</option>
+                        <option value="Formula Sheet">Formula Sheets</option>
+                        <option value="Exam Summary">Exam Summaries</option>
+                        <option value="Lecture Notes">Lecture Notes</option>
+                    </select>
+                </div>
+
+                <div class="filter-group">
+                    <span style="font-weight: 600;">Sort By:</span>
+                    <select id="sortBySelect" class="select-control">
+                        <option value="popular">🔥 Most Popular (Upvotes)</option>
+                        <option value="rating">⭐ Highest Rated</option>
+                        <option value="newest">🕒 Newest First</option>
+                        <option value="downloads">📥 Most Downloaded</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Notes Grid Container -->
+            <div id="notesGrid" class="notes-grid">
+                <!-- Dynamically populated by app.js -->
+            </div>
+
+            <!-- Empty State for Notes -->
+            <div id="notesEmptyState" class="hidden" style="text-align: center; padding: 4rem 1.5rem; background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: var(--radius-xl);">
+                <div style="font-size: 3rem; margin-bottom: 0.5rem;">🔍</div>
+                <h3 style="font-size: 1.25rem; margin-bottom: 0.5rem;">No notes match your filters</h3>
+                <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1.5rem;">Try clearing the search query or selecting "All Disciplines".</p>
+                <button onclick="document.getElementById('globalSearchInput').value=''; AppState.searchQuery=''; AppState.selectedCategory='All'; renderNotesGrid();" class="btn-primary" style="margin: 0 auto;">
+                    Reset All Filters
+                </button>
+            </div>
+        </section>
+
+
+        <!-- ====================================== -->
+        <!-- TAB 2: MY LIBRARY & PROFILE SECTION    -->
+        <!-- ====================================== -->
+        <section id="librarySection" class="hidden">
+            
+            <!-- User Profile Summary Header -->
+            <div style="background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: var(--radius-xl); padding: 2rem; margin-bottom: 2.5rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1.5rem;">
+                <div style="display: flex; align-items: center; gap: 1.25rem;">
+                    <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=120" style="width: 70px; height: 70px; border-radius: var(--radius-lg); object-fit: cover; border: 3px solid var(--primary);" />
+                    <div>
+                        <div style="display: flex; align-items: center; gap: 0.5rem;">
+                            <h2 id="userProfileName" style="font-size: 1.35rem; font-weight: 800;">Alex Rivera</h2>
+                            <span class="brand-badge" style="background: var(--success-bg); color: var(--success); border-color: rgba(16, 185, 129, 0.3);">Level 4 Scholar</span>
+                        </div>
+                        <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 0.25rem;">Stanford University • Computer Science & Mathematics</p>
+                    </div>
+                </div>
+
+                <!-- Stats summary cards -->
+                <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
+                    <div style="background: var(--bg-surface-subtle); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 0.75rem 1.25rem; text-align: center; min-width: 90px;">
+                        <div id="libRepPoints" style="font-size: 1.35rem; font-weight: 800; color: var(--primary);">480</div>
+                        <div style="font-size: 0.65rem; text-transform: uppercase; font-weight: 700; color: var(--text-muted);">Reputation</div>
+                    </div>
+                    <div style="background: var(--bg-surface-subtle); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 0.75rem 1.25rem; text-align: center; min-width: 90px;">
+                        <div id="libNotesReadCount" style="font-size: 1.35rem; font-weight: 800; color: #8b5cf6;">19</div>
+                        <div style="font-size: 0.65rem; text-transform: uppercase; font-weight: 700; color: var(--text-muted);">Notes Read</div>
+                    </div>
+                    <div style="background: var(--bg-surface-subtle); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 0.75rem 1.25rem; text-align: center; min-width: 90px;">
+                        <div id="libCardsFlippedCount" style="font-size: 1.35rem; font-weight: 800; color: #ec4899;">46</div>
+                        <div style="font-size: 0.65rem; text-transform: uppercase; font-weight: 700; color: var(--text-muted);">Cards Studied</div>
+                    </div>
+                    <div style="background: var(--bg-surface-subtle); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 0.75rem 1.25rem; text-align: center; min-width: 90px;">
+                        <div id="libDownloadsCount" style="font-size: 1.35rem; font-weight: 800; color: var(--warning);">12</div>
+                        <div style="font-size: 0.65rem; text-transform: uppercase; font-weight: 700; color: var(--text-muted);">Downloads</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Saved Notes Section -->
+            <div style="margin-bottom: 3rem;">
+                <div style="display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border-subtle); padding-bottom: 0.75rem; margin-bottom: 1.5rem;">
+                    <div style="display: flex; align-items: center; gap: 0.5rem;">
+                        <span style="font-size: 1.25rem;">📌</span>
+                        <h3 style="font-size: 1.2rem;">Saved Notes & Bookmarks</h3>
+                    </div>
+                    <span style="font-size: 0.8rem; color: var(--text-muted);">Available offline in this browser</span>
+                </div>
+                <div id="savedNotesList" class="notes-grid"></div>
+            </div>
+
+            <!-- My Uploads Section -->
+            <div>
+                <div style="display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border-subtle); padding-bottom: 0.75rem; margin-bottom: 1.5rem;">
+                    <div style="display: flex; align-items: center; gap: 0.5rem;">
+                        <span style="font-size: 1.25rem;">📤</span>
+                        <h3 style="font-size: 1.2rem;">My Uploaded Notes</h3>
+                    </div>
+                    <button onclick="openUploadModal()" class="btn-primary" style="padding: 0.45rem 1rem; font-size: 0.8rem;">
+                        + Upload New Note
+                    </button>
+                </div>
+                <div id="myUploadsList" class="notes-grid"></div>
+            </div>
+        </section>
+
+
+        <!-- ====================================== -->
+        <!-- TAB 3: AI STUDY HUB (FLASHCARDS & QUIZ)-->
+        <!-- ====================================== -->
+        <section id="studyHubSection" class="hidden">
+            
+            <div style="text-align: center; max-width: 600px; margin: 0 auto 2.5rem auto;">
+                <span class="brand-badge" style="margin-bottom: 0.75rem; display: inline-block;">🧠 Interactive Spaced Repetition</span>
+                <h2 style="font-size: 2rem; margin-bottom: 0.5rem;">Master Complex Concepts Faster</h2>
+                <p style="font-size: 0.9rem; color: var(--text-secondary);">
+                    Switch between 3D flashcard repetition and instant AI-generated multiple choice quizzes generated directly from collegiate notes.
+                </p>
+            </div>
+
+            <!-- Subject / Deck Selector -->
+            <div style="max-width: 480px; margin: 0 auto 2rem auto; display: flex; align-items: center; gap: 0.75rem; background: var(--bg-surface); padding: 0.75rem 1.25rem; border-radius: var(--radius-lg); border: 1px solid var(--border-subtle); box-shadow: var(--shadow-sm);">
+                <span style="font-size: 0.8rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">Study Deck:</span>
+                <select id="deckSelect" class="select-control" style="flex: 1; padding: 0.5rem;"></select>
+            </div>
+
+            <!-- Tab Switcher: Flashcards Deck vs Quiz Mode -->
+            <div style="max-width: 700px; margin: 0 auto;">
+                <div style="display: flex; background: var(--bg-surface-subtle); padding: 0.35rem; border-radius: var(--radius-lg); margin-bottom: 2rem; border: 1px solid var(--border-subtle);">
+                    <button id="flashcardTabBtn" onclick="document.getElementById('flashcardsModeContainer').classList.remove('hidden'); document.getElementById('quizModeContainer').classList.add('hidden'); this.style.background='var(--bg-surface)'; this.style.color='var(--primary)'; document.getElementById('quizTabBtn').style.background='transparent'; document.getElementById('quizTabBtn').style.color='var(--text-secondary)';" style="flex: 1; padding: 0.75rem; border-radius: var(--radius-md); font-weight: 700; font-size: 0.85rem; background: var(--bg-surface); color: var(--primary); transition: all 0.2s;">
+                        🃏 3D Flashcards Deck
+                    </button>
+                    <button id="quizTabBtn" onclick="document.getElementById('flashcardsModeContainer').classList.add('hidden'); document.getElementById('quizModeContainer').classList.remove('hidden'); this.style.background='var(--bg-surface)'; this.style.color='var(--primary)'; document.getElementById('flashcardTabBtn').style.background='transparent'; document.getElementById('flashcardTabBtn').style.color='var(--text-secondary)';" style="flex: 1; padding: 0.75rem; border-radius: var(--radius-md); font-weight: 700; font-size: 0.85rem; color: var(--text-secondary); transition: all 0.2s;">
+                        📝 Interactive Quiz Mode
+                    </button>
+                </div>
+
+                <!-- 1. Flashcards Mode Container -->
+                <div id="flashcardsModeContainer">
+                    <div style="display: flex; align-items: center; justify-content: space-between; font-size: 0.8rem; color: var(--text-muted); font-weight: 700; margin-bottom: 0.5rem;">
+                        <span id="flashcardCounter">Card 1 of 4</span>
+                        <span id="masteredCounter" style="color: var(--success);">0 Mastered</span>
+                    </div>
+
+                    <div style="width: 100%; height: 6px; background: var(--border-subtle); border-radius: 9999px; overflow: hidden; margin-bottom: 1.5rem;">
+                        <div id="flashcardProgress" style="width: 15%; height: 100%; background: var(--accent-gradient); transition: width 0.3s ease;"></div>
+                    </div>
+
+                    <!-- 3D Flashcard Element -->
+                    <div class="flashcard-3d-box">
+                        <div id="activeFlashcard" class="flashcard-inner">
+                            
+                            <!-- Front Side (Question) -->
+                            <div class="flashcard-front">
+                                <div style="display: flex; align-items: center; justify-content: space-between;">
+                                    <span id="flashcardSubjectBadge" class="badge-subject">Computer Science</span>
+                                    <span style="font-size: 0.75rem; color: var(--text-muted);">Click card to reveal answer 🔄</span>
+                                </div>
+                                <div style="margin: auto 0;">
+                                    <span style="font-size: 0.75rem; font-weight: 800; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; display: block; margin-bottom: 0.5rem;">Question</span>
+                                    <p id="flashcardQuestion" style="font-size: 1.25rem; font-weight: 700; color: var(--text-main); line-height: 1.5;">
+                                        What is the average time complexity for searching an element in a Hash Table?
+                                    </p>
+                                </div>
+                                <div style="font-size: 0.8rem; color: var(--primary); font-weight: 600;">
+                                    Tap or Click to Flip ↷
+                                </div>
+                            </div>
+
+                            <!-- Back Side (Answer) -->
+                            <div class="flashcard-back">
+                                <div style="display: flex; align-items: center; justify-content: space-between; font-size: 0.75rem; opacity: 0.9;">
+                                    <span>Answer & Explanation</span>
+                                    <span>Click to flip back 🔄</span>
+                                </div>
+                                <div style="margin: auto 0;">
+                                    <p id="flashcardAnswer" style="font-size: 1.15rem; font-weight: 600; line-height: 1.6;">
+                                        O(1) average time complexity, assuming a uniform hash distribution with low collision rate.
+                                    </p>
+                                </div>
+                                <div style="font-size: 0.8rem; opacity: 0.85;">
+                                    Mark your recall below to track mastery
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <!-- Flashcard Controls -->
+                    <div style="display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; flex-wrap: wrap;">
+                        <button onclick="StudyEngine.shuffleDeck()" class="btn-icon" style="width: auto; padding: 0.6rem 1rem; font-weight: 600; font-size: 0.85rem;" title="Shuffle Cards">
+                            <span>🔀</span> Shuffle
+                        </button>
+
+                        <div style="display: flex; gap: 0.6rem;">
+                            <button onclick="StudyEngine.markReview()" style="padding: 0.6rem 1.1rem; border-radius: var(--radius-md); border: 1px solid rgba(239, 68, 68, 0.4); background: var(--danger-bg); color: var(--danger); font-size: 0.85rem; font-weight: 700; transition: all 0.2s;">
+                                Still Learning ❌
+                            </button>
+                            <button onclick="StudyEngine.markMastered()" style="padding: 0.6rem 1.1rem; border-radius: var(--radius-md); border: 1px solid rgba(16, 185, 129, 0.4); background: var(--success); color: #ffffff; font-size: 0.85rem; font-weight: 700; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3); transition: all 0.2s;">
+                                Got It! Mastered ✓
+                            </button>
+                        </div>
+
+                        <div style="display: flex; gap: 0.4rem;">
+                            <button onclick="StudyEngine.prevCard()" class="btn-icon" title="Previous Card">←</button>
+                            <button onclick="StudyEngine.nextCard()" class="btn-icon" title="Next Card">→</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 2. Quiz Mode Container -->
+                <div id="quizModeContainer" class="hidden" style="background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: var(--radius-xl); padding: 2rem; box-shadow: var(--shadow-md);">
+                    <div id="quizContainer">
+                        <!-- Populated dynamically by StudyEngine.renderQuizQuestion() -->
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+
+        <!-- ====================================== -->
+        <!-- TAB 4: COMMUNITY & Q&A FORUM           -->
+        <!-- ====================================== -->
+        <section id="communitySection" class="hidden">
+            <div style="border-bottom: 1px solid var(--border-subtle); padding-bottom: 1rem; margin-bottom: 2rem;">
+                <h2 style="font-size: 1.75rem; margin-bottom: 0.35rem;">Community Notes Exchange & Study Q&A</h2>
+                <p style="font-size: 0.9rem; color: var(--text-secondary);">Request notes, share study tips, or answer peer questions to gain reputation points.</p>
+            </div>
+
+            <!-- Submit Question Card -->
+            <div style="background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: var(--radius-lg); padding: 1.5rem; margin-bottom: 2rem; box-shadow: var(--shadow-sm);">
+                <label style="display: block; font-size: 0.8rem; font-weight: 700; text-transform: uppercase; color: var(--text-muted); margin-bottom: 0.75rem;">
+                    Ask a Question or Request Specific Lecture Notes
+                </label>
+                <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
+                    <input 
+                        type="text" 
+                        id="newThreadQuestionInput" 
+                        placeholder="e.g. Does anyone have verified review notes for Multivariable Calculus Chapter 4?" 
+                        class="search-input" 
+                        style="flex: 1; min-width: 260px;" 
+                    />
+                    <button onclick="postCommunityQuestion()" class="btn-primary">
+                        Post to Community
+                    </button>
+                </div>
+            </div>
+
+            <!-- Community Threads List -->
+            <div id="communityThreadsContainer"></div>
+        </section>
+
+    </main>
+
+
+    <!-- ========================================== -->
+    <!-- INTERACTIVE NOTE READER MODAL              -->
+    <!-- (Properly hidden by default with .hidden)  -->
+    <!-- ========================================== -->
+    <div id="noteReaderModal" class="modal-overlay hidden">
+        <div class="modal-container">
+            
+            <!-- Reader Modal Header -->
+            <div class="modal-header">
+                <div style="display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap;">
+                    <span id="readerSubjectBadge" class="badge-subject">CS 201 • Computer Science</span>
+                    <span id="readerDate" style="font-size: 0.75rem; color: var(--text-muted);">Uploaded on 2026-09-15</span>
+                </div>
+
+                <!-- Reader Controls (Font size, Theme, Print, Close) -->
+                <div style="display: flex; align-items: center; gap: 0.6rem;">
+                    
+                    <!-- Font Sizing Buttons -->
+                    <div style="display: flex; border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); overflow: hidden;">
+                        <button onclick="changeReaderFontSize(-2)" class="btn-icon" style="width: 32px; height: 32px; border: none; font-size: 0.75rem;" title="Decrease Font">A-</button>
+                        <button onclick="resetReaderFontSize()" class="btn-icon" style="width: 38px; height: 32px; border: none; border-left: 1px solid var(--border-subtle); border-right: 1px solid var(--border-subtle); font-size: 0.75rem; font-weight: 700;" title="Reset Font">100%</button>
+                        <button onclick="changeReaderFontSize(2)" class="btn-icon" style="width: 32px; height: 32px; border: none; font-size: 0.75rem;" title="Increase Font">A+</button>
+                    </div>
+
+                    <!-- Reading Themes -->
+                    <div style="display: flex; gap: 0.3rem; background: var(--bg-surface-subtle); padding: 0.25rem; border-radius: var(--radius-sm);">
+                        <button onclick="setReaderTheme('default')" title="Clean Paper Theme" style="width: 20px; height: 20px; border-radius: 9999px; background: #ffffff; border: 1px solid #cbd5e1;"></button>
+                        <button onclick="setReaderTheme('sepia')" title="Warm Sepia Theme" style="width: 20px; height: 20px; border-radius: 9999px; background: #f7f1e5; border: 1px solid #d4a373;"></button>
+                        <button onclick="setReaderTheme('mint')" title="Eye-Care Mint Theme" style="width: 20px; height: 20px; border-radius: 9999px; background: #edf5ee; border: 1px solid #86efac;"></button>
+                        <button onclick="setReaderTheme('dark')" title="Night Dark Theme" style="width: 20px; height: 20px; border-radius: 9999px; background: #0b0f19; border: 1px solid #334155;"></button>
+                    </div>
+
+                    <!-- Print Button -->
+                    <button onclick="window.print()" class="btn-icon" style="width: 34px; height: 34px;" title="Print Notes">
+                        🖨️
+                    </button>
+
+                    <!-- Close Modal Button -->
+                    <button onclick="closeNoteReader()" class="btn-icon" style="width: 34px; height: 34px; color: var(--danger);" title="Close Reader">
+                        ✕
+                    </button>
+                </div>
+            </div>
+
+            <!-- Scrollable Reader Paper Area -->
+            <div class="modal-body">
+                <div id="readerPaperContainer" class="reader-paper theme-paper-default">
+                    
+                    <!-- Note Header -->
+                    <div style="border-bottom: 1px solid var(--border-subtle); padding-bottom: 1.5rem; margin-bottom: 1.5rem;">
+                        <h1 id="readerNoteTitle" style="font-size: 1.85rem; font-weight: 800; margin-bottom: 0.75rem; color: inherit;">
+                            Data Structures & Algorithms Mastery Notes
+                        </h1>
+
+                        <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;">
+                            <div style="display: flex; align-items: center; gap: 0.75rem;">
+                                <img id="readerAuthorAvatar" src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=60" style="width: 42px; height: 42px; border-radius: 9999px; object-fit: cover;" />
+                                <div>
+                                    <div style="font-size: 0.85rem; font-weight: 700; color: inherit;">
+                                        <span id="readerAuthorName">Alex Chen</span>
+                                        <span style="color: #3b82f6; font-size: 0.75rem;">✓ Verified Author</span>
+                                    </div>
+                                    <div id="readerAuthorUni" style="font-size: 0.75rem; opacity: 0.8;">Stanford University</div>
+                                </div>
+                            </div>
+
+                            <div style="display: flex; align-items: center; gap: 1rem; font-size: 0.8rem;">
+                                <span id="readerRating" style="font-weight: 700; color: var(--warning);">★ 4.9 (142 reviews)</span>
+                                <span>•</span>
+                                <span id="readerDownloads" style="opacity: 0.8;">1,480 downloads</span>
+                            </div>
+                        </div>
+
+                        <!-- Action Bar inside reader: AI Generator & Flashcards Launch -->
+                        <div style="display: flex; gap: 0.75rem; margin-top: 1.25rem; flex-wrap: wrap;">
+                            <button onclick="generateAITakeaways()" class="btn-primary" style="padding: 0.5rem 1rem; font-size: 0.8rem;">
+                                ✨ Generate AI Key Takeaways
+                            </button>
+                            <button id="readerLaunchStudyBtn" class="btn-icon" style="width: auto; padding: 0.5rem 1rem; font-size: 0.8rem; font-weight: 600;">
+                                ⚡ Launch Practice Flashcards
+                            </button>
+                        </div>
+
+                        <!-- AI Generated Takeaways Destination -->
+                        <div id="aiTakeawaysBox"></div>
+                    </div>
+
+                    <!-- Note Formatted Body -->
+                    <div id="readerContentBody"></div>
+
+                    <!-- Comments Section -->
+                    <div style="border-top: 1px solid var(--border-subtle); padding-top: 2rem; margin-top: 2.5rem;">
+                        <h3 style="font-size: 1.15rem; margin-bottom: 1rem;">💬 Academic Q&A & Peer Discussion</h3>
+
+                        <div style="display: flex; gap: 0.75rem; margin-bottom: 1.5rem;">
+                            <input 
+                                type="text" 
+                                id="readerCommentInput" 
+                                placeholder="Add a question, tip, or clarification about these notes..." 
+                                class="search-input" 
+                                style="flex: 1;"
+                            />
+                            <button onclick="postReaderComment()" class="btn-primary">
+                                Comment
+                            </button>
+                        </div>
+
+                        <div id="readerCommentsList"></div>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+
+    <!-- ========================================== -->
+    <!-- UPLOAD NOTES MODAL                         -->
+    <!-- (Properly hidden by default with .hidden)  -->
+    <!-- ========================================== -->
+    <div id="uploadNoteModal" class="modal-overlay hidden">
+        <div class="modal-container" style="max-width: 680px;">
+            
+            <div class="modal-header">
+                <div>
+                    <h3 style="font-size: 1.2rem; font-weight: 800;">📤 Share Course Notes</h3>
+                    <p style="font-size: 0.8rem; color: var(--text-muted);">Share notes with fellow students to earn +50 Reputation Points.</p>
+                </div>
+                <button onclick="closeUploadModal()" class="btn-icon" style="width: 32px; height: 32px;">✕</button>
+            </div>
+
+            <form id="uploadNoteForm" onsubmit="handleUploadFormSubmit(event)" class="modal-body" style="display: flex; flex-direction: column; gap: 1rem;">
+                
+                <div>
+                    <label style="display: block; font-size: 0.8rem; font-weight: 700; margin-bottom: 0.35rem;">Document Title *</label>
+                    <input 
+                        type="text" 
+                        id="uploadTitle" 
+                        required 
+                        placeholder="e.g. CS 161: Graph Algorithms & Dynamic Programming Guide" 
+                        class="search-input" 
+                        style="width: 100%;" 
+                    />
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                    <div>
+                        <label style="display: block; font-size: 0.8rem; font-weight: 700; margin-bottom: 0.35rem;">Subject Field *</label>
+                        <select id="uploadSubject" class="select-control" style="width: 100%; padding: 0.65rem;">
+                            <option value="Computer Science">Computer Science</option>
+                            <option value="Mathematics">Mathematics</option>
+                            <option value="Biology">Biology & Pre-Med</option>
+                            <option value="Chemistry">Chemistry</option>
+                            <option value="Physics">Physics</option>
+                            <option value="Economics">Economics & Business</option>
+                            <option value="History">History & Humanities</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label style="display: block; font-size: 0.8rem; font-weight: 700; margin-bottom: 0.35rem;">Resource Format</label>
+                        <select id="uploadResourceType" class="select-control" style="width: 100%; padding: 0.65rem;">
+                            <option value="Comprehensive Notes">Comprehensive Notes</option>
+                            <option value="Cheat Sheet">Cheat Sheet</option>
+                            <option value="Formula Sheet">Formula Sheet</option>
+                            <option value="Exam Summary">Exam Summary</option>
+                            <option value="Lecture Notes">Lecture Notes</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                    <div>
+                        <label style="display: block; font-size: 0.8rem; font-weight: 700; margin-bottom: 0.35rem;">Course Code</label>
+                        <input type="text" id="uploadCourseCode" placeholder="e.g. CS 106B, MATH 51" class="search-input" style="width: 100%;" />
+                    </div>
+
+                    <div>
+                        <label style="display: block; font-size: 0.8rem; font-weight: 700; margin-bottom: 0.35rem;">University / College</label>
+                        <input type="text" id="uploadUniversity" placeholder="e.g. Stanford University" class="search-input" style="width: 100%;" />
+                    </div>
+                </div>
+
+                <div>
+                    <label style="display: block; font-size: 0.8rem; font-weight: 700; margin-bottom: 0.35rem;">Tags (comma separated)</label>
+                    <input type="text" id="uploadTags" placeholder="algorithms, dynamic-programming, python, midterm" class="search-input" style="width: 100%;" />
+                </div>
+
+                <div>
+                    <label style="display: block; font-size: 0.8rem; font-weight: 700; margin-bottom: 0.35rem;">Short Summary / Overview *</label>
+                    <textarea id="uploadDescription" rows="2" required placeholder="Briefly describe what key exam sections or lectures are covered..." class="search-input" style="width: 100%; resize: vertical;"></textarea>
+                </div>
+
+                <div>
+                    <label style="display: block; font-size: 0.8rem; font-weight: 700; margin-bottom: 0.35rem;">Note Content (Markdown supported)</label>
+                    <textarea id="uploadContent" rows="5" placeholder="# Lecture Overview&#10;&#10;## Key Concept 1&#10;Write or paste your summary notes and equations here..." class="search-input" style="width: 100%; font-family: var(--font-mono); resize: vertical;"></textarea>
+                </div>
+
+                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                    <input type="checkbox" id="termsCheck" required />
+                    <label for="termsCheck" style="font-size: 0.75rem; color: var(--text-muted);">
+                        I confirm that these notes are original student study materials or open educational resources.
+                    </label>
+                </div>
+
+                <div style="display: flex; justify-content: flex-end; gap: 0.75rem; margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border-subtle);">
+                    <button type="button" onclick="closeUploadModal()" class="btn-icon" style="width: auto; padding: 0.5rem 1rem;">Cancel</button>
+                    <button type="submit" class="btn-primary">Publish Notes (+50 Rep)</button>
+                </div>
+
+            </form>
+
+        </div>
+    </div>
+
+
+    <!-- ========================================== -->
+    <!-- FOOTER                                     -->
+    <!-- ========================================== -->
+    <footer style="border-top: 1px solid var(--border-subtle); background: var(--bg-surface); padding: 2rem 1.25rem; margin-top: auto;">
+        <div style="max-w: 1280px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem; font-size: 0.8rem; color: var(--text-muted);">
+            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                <strong style="color: var(--text-main);">StudySync</strong>
+                <span>• The Collaborative Academic Knowledge Hub</span>
+            </div>
+            <div style="display: flex; gap: 1.5rem;">
+                <a href="#" onclick="switchTab('explore'); return false;" style="color: inherit;">Explore Feed</a>
+                <a href="#" onclick="switchTab('studyHub'); return false;" style="color: inherit;">AI Study Hub</a>
+                <a href="#" onclick="switchTab('community'); return false;" style="color: inherit;">Community</a>
+                <button onclick="StorageManager.resetAll(); location.reload();" style="color: var(--danger); font-size: 0.8rem;">Reset Demo Data</button>
+            </div>
+            <div>
+                <span>© 2026 StudySync. Student-curated study platform.</span>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Core Scripts -->
+    <script src="js/data.js"></script>
+    <script src="js/storage.js"></script>
+    <script src="js/flashcards.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
